@@ -1,7 +1,7 @@
 from typing import Annotated
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Path
 from starlette import status
 from models import Todos
 from database import SessionLocal
@@ -38,3 +38,11 @@ async def create_todo(db: db_dependency, todo_request: TodoRequest):
 
     db.add(todo_model)
     db.commit()
+
+
+@router.get("/todo/{todo_id}", status_code=status.HTTP_200_OK)
+async def read_todo(db: db_dependency, todo_id: int = Path(gt=0)):
+    todo_model = db.query(Todos).filter(Todos.id == todo_id).first()
+    if todo_model is not None:
+        return todo_model
+    raise HTTPException(status_code=404, detail="Todo not found.")
