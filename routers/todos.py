@@ -30,3 +30,11 @@ class TodoRequest(BaseModel):
 @router.get("/todos", status_code=status.HTTP_200_OK)
 async def read_all(db: db_dependency):
     return db.query(Todos).all()
+
+
+@router.post("/todo", status_code=status.HTTP_201_CREATED)
+async def create_todo(db: db_dependency, todo_request: TodoRequest):
+    todo_model = Todos(**todo_request.dict())
+
+    db.add(todo_model)
+    db.commit()
